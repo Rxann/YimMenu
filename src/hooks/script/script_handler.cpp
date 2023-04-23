@@ -1,6 +1,8 @@
 #include "gta/script_handler.hpp"
 
 #include "hooking.hpp"
+#include "pointers.hpp"
+
 
 namespace big
 {
@@ -29,7 +31,7 @@ namespace big
 
 	bool hooks::script_handler_is_networked(CGameScriptHandler* _this)
 	{
-		return true;
+		return *g_pointers->m_gta.m_is_session_started;
 	}
 
 	bool hooks::script_handler_dtor(CGameScriptHandler* _this, bool free_memory)
