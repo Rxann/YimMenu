@@ -4,6 +4,36 @@ namespace big
 {
 	void view::protection_settings()
 	{
+		if (ImGui::Button("Reset to default"))
+		{
+			g.protections.script_events.bounty                     = true;
+			g.protections.script_events.ceo_money                  = true;
+			g.protections.script_events.fake_deposit               = true;
+			g.protections.script_events.force_mission              = true;
+			g.protections.script_events.force_teleport             = true;
+			g.protections.script_events.gta_banner                 = false;
+			g.protections.script_events.mc_teleport                = true;
+			g.protections.script_events.personal_vehicle_destroyed = true;
+			g.protections.script_events.remote_off_radar           = true;
+			g.protections.script_events.rotate_cam                 = true;
+			g.protections.script_events.send_to_cutscene           = true;
+			g.protections.script_events.send_to_location           = true;
+			g.protections.script_events.sound_spam                 = true;
+			g.protections.script_events.spectate                   = true;
+			g.protections.script_events.give_collectible           = true;
+			g.protections.script_events.vehicle_kick               = true;
+			g.protections.script_events.teleport_to_warehouse      = true;
+			g.protections.script_events.start_activity             = true;
+			g.protections.script_events.send_sms                   = true;
+			g.protections.desync_kick                              = false;
+			g.protections.rid_join                                 = false;
+			g.protections.lessen_breakups                          = false;
+			g.protections.receive_pickup                           = false;
+			g.protections.admin_check                              = true;
+		}
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip("Be careful, there is no undo button...");
+
 		ImGui::BeginGroup();
 		ImGui::Checkbox("BOUNTY"_T.data(), &g.protections.script_events.bounty);
 		ImGui::Checkbox("CEO_MONEY"_T.data(), &g.protections.script_events.ceo_money);
