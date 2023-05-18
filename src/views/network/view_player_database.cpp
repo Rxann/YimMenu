@@ -30,11 +30,11 @@ namespace big
 
 			//render status circle
 			ImGui::GetWindowDrawList()->AddCircleFilled(ImVec2(cursor_pos.x + 4.f + circle_size, cursor_pos.y + 4.f + circle_size),
-				circle_size,
-				ImColor(plyr_state == PlayerOnlineStatus::ONLINE  ? ImVec4(0.f, 1.f, 0.f, 1.f) :
-						plyr_state == PlayerOnlineStatus::OFFLINE ? ImVec4(1.f, 0.f, 0.f, 1.f) :
-						plyr_state == PlayerOnlineStatus::UNKNOWN ? ImVec4(.5f, .5f, .5f, 1.0f) :
-																	ImVec4(.5f, .5f, .5f, 1.0f)));
+			    circle_size,
+			    ImColor(plyr_state == PlayerOnlineStatus::ONLINE  ? ImVec4(0.f, 1.f, 0.f, 1.f) :
+			            plyr_state == PlayerOnlineStatus::OFFLINE ? ImVec4(1.f, 0.f, 0.f, 1.f) :
+			            plyr_state == PlayerOnlineStatus::UNKNOWN ? ImVec4(.5f, .5f, .5f, 1.0f) :
+			                                                        ImVec4(.5f, .5f, .5f, 1.0f)));
 
 			//we need some padding
 			ImVec2 cursor = ImGui::GetCursorPos();
@@ -53,7 +53,6 @@ namespace big
 
 	void view::player_database()
 	{
-
 		ImGui::SetNextItemWidth(300.f);
 		components::input_text_with_hint("PLAYER"_T, "SEARCH"_T, search, sizeof(search), ImGuiInputTextFlags_None);
 
@@ -83,6 +82,15 @@ namespace big
 			}
 
 			ImGui::ListBoxFooter();
+			if (ImGui::Button("Delete All Stored Players"))
+			{
+				auto pdb = g_player_database_service->get_players();
+				for (auto i = pdb.begin(); i != pdb.end(); i++)
+				{
+					g_player_database_service->remove_rockstar_id(i->second->rockstar_id);
+				}
+				g_notification_service->push_warning("Delete All Stored Players", "All Stored Players have been deleted from the database.");
+			}
 		}
 
 		if (auto selected = g_player_database_service->get_selected())
@@ -95,7 +103,9 @@ namespace big
 					current_player->name = name_buf;
 				}
 
-				if (ImGui::InputScalar("RID"_T.data(), ImGuiDataType_S64, &current_player->rockstar_id) || ImGui::Checkbox("IS_MODDER"_T.data(), &current_player->is_modder) || ImGui::Checkbox("BLOCK_JOIN"_T.data(), &current_player->block_join))
+				if (ImGui::InputScalar("RID"_T.data(), ImGuiDataType_S64, &current_player->rockstar_id)
+				    || ImGui::Checkbox("IS_MODDER"_T.data(), &current_player->is_modder)
+				    || ImGui::Checkbox("BLOCK_JOIN"_T.data(), &current_player->block_join))
 				{
 					if (current_player->rockstar_id != selected->rockstar_id)
 						g_player_database_service->update_rockstar_id(selected->rockstar_id, current_player->rockstar_id);
