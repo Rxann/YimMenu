@@ -453,18 +453,24 @@ namespace big
 		case eNetworkEvents::SCRIPTED_GAME_EVENT:
 		{
 			const auto scripted_game_event = std::make_unique<CScriptedGameEvent>();
+
 			buffer->ReadDword(&scripted_game_event->m_args_size, 32);
-			if (scripted_game_event->m_args_size - 1 <= 0x1AF)
-				buffer->ReadArray(&scripted_game_event->m_args, 8 * scripted_game_event->m_args_size);
+			if (scripted_game_event->m_args_size > sizeof(scripted_game_event->m_args))
+			{
+				notify::crash_blocked(source_player, "out of bounds tse args size");
+				g_pointers->m_gta.m_send_event_ack(event_manager, source_player, target_player, event_index, event_handled_bitset);
+				return;
+			}
+
+			buffer->ReadArray(&scripted_game_event->m_args, 8 * scripted_game_event->m_args_size);
 
 			if (hooks::scripted_game_event(scripted_game_event.get(), source_player))
 			{
 				g_pointers->m_gta.m_send_event_ack(event_manager, source_player, target_player, event_index, event_handled_bitset);
-
 				return;
 			}
-			buffer->Seek(0);
 
+			buffer->Seek(0);
 			break;
 		}
 		case eNetworkEvents::NETWORK_CLEAR_PED_TASKS_EVENT:
@@ -533,6 +539,13 @@ namespace big
 				    || personal_vehicle == veh              //Or we're in our personal vehicle.
 				    || self::spawned_vehicles.contains(net_id)) // Or it's a vehicle we spawned.
 				{
+					auto plyr = g_player_service->get_by_id(source_player->m_player_id);
+					// Let trusted friends and players request control (e.g., they want to hook us to their tow-truck or something)
+					if (plyr && (plyr->is_trusted || (g.session.trust_friends && plyr->is_friend())))
+					{
+						return;
+					}
+
 					if (g_local_player->m_vehicle->m_driver != source_player->m_player_info->m_ped) //This will block hackers who are not in the car but still want control.
 					{
 						g_pointers->m_gta.m_send_event_ack(event_manager, source_player, target_player, event_index, event_handled_bitset); // Tell them to get bent.
