@@ -1,5 +1,6 @@
 #include "base/CBaseModelInfo.hpp"
 #include "base/CObject.hpp"
+#include "core/data/admin_rids.hpp"
 #include "core/data/task_types.hpp"
 #include "entities/fwEntity.hpp"
 #include "gta/net_object_mgr.hpp"
@@ -1354,7 +1355,8 @@ namespace big
 					if (is_invalid_override_pos(posX + player_sector_pos_x, posY + player_sector_pos_y))
 					{
 						std::stringstream crash_reason;
-						crash_reason << "invalid sector position (sector node)" << " X: " << posX << " Y: " << posY << " player_sector_pos_x: " << player_sector_pos_x << " player_sector_pos_y: " << player_sector_pos_y;
+						crash_reason << "invalid sector position (sector node)"
+						             << " X: " << posX << " Y: " << posY << " player_sector_pos_x: " << player_sector_pos_x << " player_sector_pos_y: " << player_sector_pos_y;
 						notify::crash_blocked(sender, crash_reason.str().c_str());
 						return true;
 					}
@@ -1365,7 +1367,7 @@ namespace big
 			{
 				const auto game_state_node = (CPlayerGameStateDataNode*)(node);
 				if (game_state_node->m_is_overriding_population_control_sphere
-				    && is_invalid_override_pos(game_state_node->m_population_control_sphere_x,game_state_node->m_population_control_sphere_y))
+				    && is_invalid_override_pos(game_state_node->m_population_control_sphere_x, game_state_node->m_population_control_sphere_y))
 				{
 					if (gta_util::get_network()->m_game_session_ptr->is_host())
 						notify::crash_blocked(sender, "invalid sector position (player game state node)");
@@ -1520,6 +1522,17 @@ namespace big
 						{
 							session::add_infraction(sender_plyr, Infraction::SPOOFED_DATA);
 						}
+
+						if (gamer_node->m_clan_data.m_clan_id == 41564112 || gamer_node->m_clan_data.m_clan_id_2 == 41564112)
+						{
+							// Spoofing Clan
+							session::add_infraction(sender_plyr, Infraction::SPOOFED_DATA);
+						}
+					}
+					else if ((!admin_rids.contains(sender_plyr->get_rockstar_id()) && gamer_node->m_clan_data.m_is_system_clan))
+					{
+						// Spoofing R* Crew
+						session::add_infraction(sender_plyr, Infraction::SPOOFED_DATA);
 					}
 				}
 				break;
@@ -1558,7 +1571,7 @@ namespace big
 							}
 						}
 					}
-					else if (veh_creation_model != std::nullopt) 
+					else if (veh_creation_model != std::nullopt)
 					{
 						// object hasn't been created yet, but we have the model hash from the creation node
 						if (auto model_info = model_info::get_vehicle_model(veh_creation_model.value()))
@@ -1570,7 +1583,7 @@ namespace big
 							}
 						}
 					}
-					else // should (probably) never reach here
+					else [[unlikely]] // should (probably) never reach here
 					{
 						control_node->m_is_submarine_car = false; // safe
 					}
