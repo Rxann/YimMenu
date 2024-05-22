@@ -294,15 +294,6 @@ namespace big
                 g_pointers->m_gta.m_write_bitbuf_array = ptr.add(1).rip().as<decltype(gta_pointers::m_write_bitbuf_array)>();
             }
         },
-        // Write Player Game State Data Node
-        {
-            "WPGSDN",
-            "48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 54 41 55 41 56 41 57 48 83 EC 30 0F B7 81",
-            [](memory::handle ptr)
-            {
-                g_pointers->m_gta.m_write_player_game_state_data_node = ptr.as<functions::write_player_game_state_data_node>();
-            }
-        },
         // Ptr To Handle
         {
             "PTH",
@@ -382,15 +373,6 @@ namespace big
             [](memory::handle ptr)
             {
                 g_pointers->m_gta.m_give_pickup_rewards = ptr.sub(0x28).as<decltype(gta_pointers::m_give_pickup_rewards)>();
-            }
-        },
-        // Write Player Gamer Data Node
-        {
-            "WPGDN",
-            "48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC 20 48 81 C1 ? ? ? ? 48 8B DA E8",
-            [](memory::handle ptr)
-            {
-                g_pointers->m_gta.m_write_player_gamer_data_node = ptr.as<PVOID>();
             }
         },
         // Receive Net Message
@@ -543,15 +525,6 @@ namespace big
                 g_pointers->m_gta.m_fipackfile_close_archive = ptr.add(0xD).rip().as<functions::fipackfile_close_archive>();
                 g_pointers->m_gta.m_fipackfile_open_archive = ptr.add(0x34).rip().as<functions::fipackfile_open_archive>();
                 g_pointers->m_gta.m_fipackfile_mount = ptr.add(0x47).rip().as<functions::fipackfile_mount>();
-            }
-        },
-        // Invalid Mods Crash Detour
-        {
-            "IMCD",
-            "E8 ? ? ? ? 40 88 7C 24 ? 49 89 9C 24",
-            [](memory::handle ptr)
-            {
-                g_pointers->m_gta.m_invalid_mods_crash_detour = ptr.add(1).rip().as<PVOID>();
             }
         },
         // Send Chat Ptr
@@ -1076,15 +1049,6 @@ namespace big
                 g_pointers->m_gta.m_receive_pickup = ptr.as<PVOID>();
             }
         },
-        // Write Player Camera Data Node
-        {
-            "WPCDN",
-            "48 8B C4 48 89 58 20 55 56 57 41 54 41 55 41 56 41 57 48 8D 6C 24 B0 48 81 EC 50 01 00 00 4C",
-            [](memory::handle ptr)
-            {
-                g_pointers->m_gta.m_write_player_camera_data_node = ptr.as<PVOID>();
-            }
-        },
         // Send Player Card Stats
         {
             "SPCS",
@@ -1110,24 +1074,6 @@ namespace big
             [](memory::handle ptr)
             {
                 g_pointers->m_gta.m_serialize_stats = ptr.as<PVOID>();
-            }
-        },
-        // Write Player Creation Data Node
-        {
-            "WPCDN",
-            "48 83 EC 38 48 8B 81 F0",
-            [](memory::handle ptr)
-            {
-                g_pointers->m_gta.m_write_player_creation_data_node = ptr.as<PVOID>();
-            }
-        },
-        // Write Player Appearance Data Node
-        {
-            "WPADN",
-            "48 8B C4 48 89 50 10 48 89 48 08 53",
-            [](memory::handle ptr)
-            {
-                g_pointers->m_gta.m_write_player_appearance_data_node = ptr.as<PVOID>();
             }
         },
         // Enumerate Audio Devices
@@ -1612,10 +1558,12 @@ namespace big
         // ERROR message box
         {
             "E0MB",
-            "E8 ? ? ? ? CC FF 15",
+            "E8 ? ? ? ? 33 F6 EB 0F",
             [](memory::handle ptr)
             {
-                g_pointers->m_gta.m_error_message_box = ptr.add(1).rip().as<PVOID>();
+                ptr = ptr.add(1).rip();
+                g_pointers->m_gta.m_error_message_box = ptr.add(7).rip().as<PVOID>();
+                g_pointers->m_gta.m_error_message_box_2 = ptr.as<PVOID>();
             }
         },
         // Get title caption for ERROR message box
@@ -1772,25 +1720,52 @@ namespace big
             [](memory::handle ptr)
             {
                 g_pointers->m_gta.m_searchlight_crash = ptr.sub(0x1E).as<PVOID>();
-                g_pointers->m_gta.m_get_unk_weapon = ptr.add(0x28).rip().as<functions::get_unk_weapon>();
+                g_pointers->m_gta.m_get_searchlight = ptr.add(0x28).rip().as<functions::get_searchlight>();
             }
         },
-        // Clone Create Pool
+        // Vehicle Allocator
         {
-            "CCP",
+            "VA",
             "48 8B 0D ? ? ? ? 45 33 C9 BA ? ? ? ? 41",
             [](memory::handle ptr)
             {
-                g_pointers->m_gta.m_clone_create_pool = ptr.add(3).rip().as<GenericPool**>();
+                g_pointers->m_gta.m_vehicle_allocator = ptr.add(3).rip().as<GenericPool**>();
             }
         },
-        // Write Physical Script Game State Data Node
+        // Write Node Data
         {
-            "WPSGSDN",
-            "48 89 5C 24 08 48 89 6C 24 10 48 89 74 24 18 57 41 56 41 57 48 83 EC 20 4C 8D B1 D0 FE",
+            "WND",
+            "48 8B 89 A8 00 00 00 4C 8B 11 49 FF 62 10",
             [](memory::handle ptr)
             {
-                g_pointers->m_gta.m_write_physical_script_game_state_data_node = ptr.as<PVOID>();
+                g_pointers->m_gta.m_write_node_data = ptr.as<PVOID>();
+            }
+        },
+        // Can Send Node To Player
+        {
+            "CSNTP",
+            "44 8B C3 FF 90 B0 00 00 00",
+            [](memory::handle ptr)
+            {
+                g_pointers->m_gta.m_can_send_node_to_player = ptr.sub(0x2E).as<PVOID>();
+            }
+        },
+        // Write Node
+        {
+            "WN",
+            "49 89 43 C8 E8 E2 FB 50 00",
+            [](memory::handle ptr)
+            {
+                g_pointers->m_gta.m_write_node = ptr.sub(0x49).as<PVOID>();
+            }
+        },
+        // Get Sector Data
+        {
+            "GSD",
+            "40 53 48 83 EC 20 F3 0F 10 59 08",
+            [](memory::handle ptr)
+            {
+                g_pointers->m_gta.m_get_sector_data = ptr.as<functions::get_sector_data>();
             }
         }
         >(); // don't leave a trailing comma at the end
